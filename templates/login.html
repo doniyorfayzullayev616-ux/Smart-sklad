@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart-Sklad - Kirish</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 320px; }
+        h2 { color: #1e293b; text-align: center; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
+        input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        button:hover { background-color: #2563eb; }
+        .error-msg { color: #ef4444; font-size: 13px; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>Smart-Sklad</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Foydalanuvchi nomi</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="input-group">
+                <label>Parol</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Kirish</button>
+            <div id="error" class="error-msg"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+
+            errorDiv.textContent = "";
+
+            try {
+                // Django backend'dagi JWT login manziliga so'rov yuborish
+                const response = await fetch('/api/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Kelgan access tokenni brauzer xotirasiga saqlab qo'yamiz
+                    localStorage.setItem('access_token', data.access);
+                    // Keyinchalik mahsulotlar sahifasiga yo'naltiramiz
+                    window.location.href = '/dashboard/';
+                } else {
+                    errorDiv.textContent = "Login yoki parol noto'g'ri!";
+                }
+            } catch (err) {
+                errorDiv.textContent = "Server bilan aloqada xatolik yuz berdi!";
+            }
+        });
+    </script>
+</body>
+</html>
