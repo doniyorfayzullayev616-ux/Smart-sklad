@@ -37,6 +37,9 @@ class Product(BaseModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['id']
+
 # Savdo (kassa) bo'limi
 class Sale(BaseModel):
     cashier = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sales')

@@ -37,6 +37,17 @@
         <button class="logout-btn" onclick="logout()">Chiqish</button>
         <h2>Smart-Sklad Paneli</h2>
 
+        <!-- AI Kunlik Tahlilchi Bloki -->
+        <div id="aiPanel" style="display: block; margin-top: 20px; margin-bottom: 25px; padding: 20px; border-radius: 8px; border-left: 5px solid #8b5cf6; background: #faf5ff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: #6b21a8; font-size: 18px;">🤖 AI Kunlik Tahlilchi (Gemini)</h3>
+                <button type="button" onclick="fetchAiReport()" style="background-color: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">Hisobotni yangilash</button>
+            </div>
+            <p id="aiReportText" style="margin-top: 15px; line-height: 1.6; color: #374151; font-size: 15px;">
+                Do'kondagi bugungi savdo holatini tahlil qilish uchun tugmani bosing.
+            </p>
+        </div>
+
         <div class="grid-container">
             <!-- Kassa Paneli -->
             <div class="panel">
@@ -56,7 +67,7 @@
             </div>
 
             <!-- Mahsulot Qo'shish Paneli -->
-            <div class="panel">
+            <div class="panel" id="addProductPanel" style="display: none;">
                 <h3>Yangi Mahsulot Qo'shish</h3>
                 <form id="addProductForm">
                     <div class="form-group">
@@ -81,6 +92,10 @@
             </div>
         </div>
 
+        <!-- Kategoriyalar Paneli -->
+        <h3>Kategoriyalar</h3>
+        <div id="categoryList" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;"></div>
+
         <h3>Ombordagi mahsulotlar</h3>
         <input type="text" id="searchInput" class="search-box" placeholder="Mahsulot nomi bo'yicha qidirish">
         <a href="/api/export/excel/" style="display: inline-block; padding: 10px 15px;background-color: #10b981; color:white; text-decoration: none; border-radius: 4px; font-weight: bold; margin-bottom: 15px; float: right;">
@@ -94,13 +109,26 @@
                     <th>Kategoriya ID</th>
                     <th>Narxi</th>
                     <th>Qoldiq</th>
-                    <th>Amal</th>
+                    <th id="actionHeader">Amal</th>
                 </tr>
             </thead>
-            <tbody id="productTableBody">
-                <!-- JavaScript orqali to'ldiriladi -->
-            </tbody>
+            <tbody id="productTableBody"></tbody>
         </table>
+
+        <!-- Sahifalash tugmalari -->
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button id="prevBtn" onclick="loadPage(prevPageUrl)" style="display: none;">⬅️ Oldingi</button>
+            <button id="nextBtn" onclick="loadPage(nextPageUrl)" style="display: none;">Keyingi ➡️</button>
+        </div>
+
+        <div class="category-box" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
+            <h4>Yangi kategoriya yaratish</h4>
+            <form id="categoryForm">
+                <input type="text" id="categoryName" placeholder="Masalan: Noutbuklar" required style="padding: 5px; width: 200px;">
+                <button type="submit" style="padding: 5px 15px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">Qo'shish</button>
+            </form>
+            <p id="catMessage" style="color: green; display: none; margin-top: 10px;">Kategoriya muvaffaqiyatli qo'shildi!</p>
+        </div>
     </div>
 
     <script>
@@ -109,35 +137,69 @@
             window.location.href = '/api/login-ui/';
         }
 
-        // 1. Mahsulotlarni o'qish (READ)
-        // 1. loadProducts funksiyasini yangilang:
-        async function loadProducts(searchQuery = '') {
-            try {
-                // Agar qidiruv so'zi bo'lsa manzilga ?search= qo'shamiz
-                let url = '/api/products/';
-                if (searchQuery) {
-                    url += `?search=${searchQuery}`;
-                }
+        let isAdmin = false;
 
+        async function checkUserRole() {
+            try {
+                const response = await fetch('/api/user-role/', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    isAdmin = data.is_admin;
+                }
+            } catch (err) {
+                console.error("Rolni aniqlashda xatolik:", err);
+            }
+
+            const addPanel = document.getElementById('addProductPanel');
+            if (addPanel) {
+                addPanel.style.display = isAdmin ? 'block' : 'none';
+            }
+
+            loadProducts();
+        }
+
+        let nextPageUrl = null;
+        let prevPageUrl = null;
+
+        async function loadProducts(url = '/api/products/') {
+            try {
                 const response = await fetch(url, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    const products = data.results || data;
+                    nextPageUrl = data.next;
+                    prevPageUrl = data.previous;
 
+                    document.getElementById('nextBtn').style.display = nextPageUrl ? 'inline-block' : 'none';
+                    document.getElementById('prevBtn').style.display = prevPageUrl ? 'inline-block' : 'none';
+
+                    const actionHeader = document.getElementById('actionHeader');
+                    if (actionHeader) {
+                        actionHeader.style.display = isAdmin ? '' : 'none';
+                    }
+
+                    const products = data.results || data;
                     const tbody = document.getElementById('productTableBody');
                     tbody.innerHTML = "";
                     products.forEach(p => {
+                        const isLowStock = p.stock_quantity < 5;
+                        const stockColor = isLowStock ? "color: #ef4444;" : "color: #1e293b;";
+                        const alertIcon = isLowStock ? `<span style="font-size: 12px; margin-left: 5px; color: #ef4444;">⚠️ Kam!</span>` : "";
+
+                        const actionBtn = isAdmin
+                            ? `<td><button class="btn-delete" onclick="deleteProduct(${p.id})">O'chirish</button></td>`
+                            : '';
+
                         tbody.innerHTML += `<tr>
                             <td>${p.id}</td>
                             <td>${p.name}</td>
                             <td>${p.category}</td>
                             <td>${p.price} so'm</td>
-                            <td><b>${p.stock_quantity}</b></td>
-                            <td>
-                                <button class="btn-delete" onclick="deleteProduct(${p.id})">O'chirish</button>
-                            </td>
+                            <td style="${stockColor}"><b>${p.stock_quantity}</b> ${alertIcon}</td>
+                            <td>${actionBtn}</td>
                         </tr>`;
                     });
                 }
@@ -146,15 +208,40 @@
             }
         }
 
-        // 2. Qidiruv qutisida klaviatura bosilishini eshituvchi funksiya:
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            // Har safar harf yozilganda, API ga o'sha so'zni yuboramiz
-            loadProducts(e.target.value);
-        });
+        checkUserRole();
 
-        loadProducts(); // Sahifa ochilganda barcha mahsulotlarni yuklash
+        async function loadCategoriesList() {
+            try {
+                const response = await fetch('/api/categories/', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const categories = data.results || data;
+                    const catDiv = document.getElementById('categoryList');
 
-        // 2. Savdo qilish
+                    catDiv.innerHTML = `<button class="cat-btn" onclick="filterByCategory('/api/products/', this)" style="background-color: #3b82f6; color: white; border: none; border-radius: 20px; padding: 8px 20px; cursor: pointer;">Barcha mahsulotlar</button>`;
+
+                    categories.forEach(c => {
+                        catDiv.innerHTML += `<button class="cat-btn" onclick="filterByCategory('/api/products/?category=${c.id}', this)" style="background-color: #64748b; color: white; border: none; border-radius: 20px; padding: 8px 20px; cursor: pointer;">${c.name}</button>`;
+                    });
+                }
+            } catch (err) {
+                console.error("Kategoriyalarni yuklashda xatolik:", err);
+            }
+        }
+
+        function filterByCategory(url, clickedBtn) {
+            const allBtns = document.querySelectorAll('.cat-btn');
+            allBtns.forEach(btn => {
+                btn.style.backgroundColor = '#64748b';
+            });
+            clickedBtn.style.backgroundColor = '#3b82f6';
+            loadProducts(url);
+        }
+
+        loadCategoriesList();
+
         document.getElementById('saleForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const msgDiv = document.getElementById('saleMsg');
@@ -184,7 +271,6 @@
             }
         });
 
-        // 3. Yangi mahsulot qo'shish (CREATE)
         document.getElementById('addProductForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const msgDiv = document.getElementById('addMsg');
@@ -207,7 +293,7 @@
                     msgDiv.style.color = "#16a34a";
                     msgDiv.textContent = "Mahsulot bazaga qo'shildi!";
                     document.getElementById('addProductForm').reset();
-                    loadProducts(); // Jadvalni yangilash
+                    loadProducts();
                 } else {
                     msgDiv.style.color = "#ef4444";
                     msgDiv.textContent = "Kategoriya ID xato yoki ma'lumot kam";
@@ -217,7 +303,6 @@
             }
         });
 
-        // 4. Mahsulotni o'chirish (DELETE)
         async function deleteProduct(id) {
             if(confirm("Rostdan ham bu mahsulotni o'chirmoqchimisiz?")) {
                 try {
@@ -238,9 +323,64 @@
             }
         }
 
+        document.getElementById('categoryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const catName = document.getElementById('categoryName').value;
+
+            try {
+                const response = await fetch('/api/categories/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name: catName })
+                });
+
+                if (response.ok) {
+                    document.getElementById('catMessage').style.display = 'block';
+                    document.getElementById('categoryName').value = '';
+                    setTimeout(() => {
+                        document.getElementById('catMessage').style.display = 'none';
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    alert("Xatolik yuz berdi. Kategoriyalarni qo'shish huquqingiz bormi?");
+                }
+            } catch (error) {
+                console.error("Tarmoq xatosi:", error);
+            }
+        });
+
         function logout() {
             localStorage.removeItem('access_token');
             window.location.href = '/dashboard/';
+        }
+
+        async function fetchAiReport() {
+            const reportEl = document.getElementById('aiReportText');
+            reportEl.innerHTML = "⏳ <i>Gemini ma'lumotlarni tahlil qilmoqda, iltimos kuting...</i>";
+
+            try {
+                const response = await fetch('/api/ai-report/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    reportEl.innerText = data.report;
+                } else {
+                    reportEl.innerText = "Xatolik: " + (data.error || JSON.stringify(data));
+                }
+            } catch (err) {
+                console.error(err);
+                reportEl.innerText = "Server bilan bog'lanishda xatolik yuz berdi.";
+            }
         }
     </script>
 </body>
