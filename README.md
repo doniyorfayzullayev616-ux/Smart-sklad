@@ -1,28 +1,31 @@
-# 📦 Smart-Sklad API
+# 📦 Smart-Sklad - Ombor va Kassa Boshqaruv Tizimi
 
-Smart-Sklad — bu do'kon va omborxonalar uchun mahsulotlarni boshqarishga mo'ljallangan ishonchli va xavfsiz RESTful API tizimi. Loyiha biznes ehtiyojlarini hisobga olgan holda ishlab chiqilgan va to'liq Docker muhitiga qadoqlangan.
+Smart-Sklad — bu do'kon va omborxonalar uchun mahsulotlarni, kassa jarayonlarini va ombor qoldiqlarini boshqarishga mo'ljallangan ishonchli, xavfsiz va to'liq avtomatlashtirilgan tizim. Loyiha zamonaviy biznes ehtiyojlarini hisobga olgan holda ishlab chiqilgan va Docker muhitiga qadoqlangan.
 
 ## 🚀 Asosiy Imkoniyatlar (Features)
 
-* **To'liq CRUD:** Mahsulotlar va kategoriyalarni qo'shish, o'qish, tahrirlash va o'chirish.
-* **Xavfsizlik (Authentication):** JWT (JSON Web Tokens) orqali ishonchli avtorizatsiya va ruxsatlarni boshqarish tizimi.
-* **Qidiruv va Filtrlash:** Mahsulotlarni nomi va xususiyatlari bo'yicha tezkor qidirish imkoniyati (`SearchFilter`).
-* **Hisobot (Export):** Ombor qoldiqlarini Excel (CSV) formatida ko'chirib olish funksiyasi.
-* **Konteynerizatsiya:** Docker va Docker Compose orqali istalgan operatsion tizimda bitta buyruq bilan xatosiz ishga tushirish.
+- **AI Kunlik Tahlilchi (Gemini):** Sun'iy intellekt orqali kunlik savdolar va ombor qoldiqlari bo'yicha avtomatik biznes-tahlil va xulosalar.
+- **Xavfsiz Avtorizatsiya (Cookie JWT):** XSS hujumlaridan 100% himoyalangan, JWT tokenlarni faqat `HttpOnly` cookie'larda saqlovchi zamonaviy xavfsizlik tizimi.
+- **Ma'lumotlar Butunligi (Soft Delete):** Mahsulotlarni bazadan butunlay o'chirib yubormasdan "Arxivlash" (is_active) orqali kassa tarixini saqlab qolish mantiqi.
+- **Kassa va Tranzaksiyalar:** Kassa jarayonlarida xatoliklarni oldini olish uchun `transaction.atomic` yordamida ishonchli savdo amaliyotlari.
+- **Optimallashtirilgan API:** Katta hajmdagi ma'lumotlar serverni qotirib qo'ymasligi uchun Pagination va SearchFilter.
+- **Interaktiv UI:** Vanilla JavaScript va Fetch API orqali sahifani yangilamasdan ishlaydigan tezkor (SPA uslubidagi) frontend qismi.
+- **Hisobot (Export):** Ombor qoldiqlarini Excel (CSV) formatida ko'chirib olish.
 
 ## 🛠 Texnologiyalar (Tech Stack)
 
-* **Dasturlash tili:** Python 3.12
-* **Backend:** Django, Django REST Framework
-* **Avtorizatsiya:** djangorestframework-simplejwt
-* **Ma'lumotlar bazasi:** SQLite
-* **Infratuzilma:** Docker, Docker Compose
+- **Backend:** Python 3.12, Django, Django REST Framework
+- **Frontend:** HTML, CSS, Vanilla JavaScript
+- **Ma'lumotlar bazasi:** PostgreSQL 15
+- **Avtorizatsiya:** djangorestframework-simplejwt (HttpOnly Cookie)
+- **Sun'iy Intellekt:** Google Gemini API
+- **Infratuzilma:** Docker, Docker Compose
 
-## ⚙️ Loyihani ishga tushirish
+## ⚙️ Loyihani ishga tushirish (Local deployment)
 
-Loyihani kompyuteringizda yurgizish uchun Docker o'rnatilgan bo'lishi kerak. 
+Loyihani kompyuteringizda yurgizish uchun Docker va Docker Compose o'rnatilgan bo'lishi kerak. Boshqa hech qanday dastur yoki Python kutubxonasi talab etilmaydi.
 
 1. Repozitoriyani kompyuterga yuklab oling:
 ```bash
-git clone [https://github.com/SIZNING-LOGININGIZ/Smart-Sklad.git](https://github.com/SIZNING-LOGININGIZ/Smart-Sklad.git)
+git clone [https://github.com/doniyorfayzullayev616-ux/Smart-sklad.git](https:https://github.com/doniyorfayzullayev616-ux/Smart-sklad.git)
 cd Smart-Sklad

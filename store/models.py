@@ -11,19 +11,19 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='CASHIER')
 
     def __str__(self):
-        return f"{self.username} ({self.role}"
+        return f"{self.username} ({self.role})"
 
 # Barcha modellar uchun umumiy vaqt maydonlari (DRY tamoyili)
 class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add = True)
-    updated_at = models.DateTimeField(auto_now = True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
 
 # Ombor bo'limi
 class Categories(BaseModel):
-    name = models.CharField(max_length=100, unique = True)
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name

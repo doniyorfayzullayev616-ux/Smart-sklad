@@ -1,25 +1,14 @@
-from rest_framework import viewsets
+from django.shortcuts import render
+from django.http import HttpResponse
+from rest_framework import viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Categories, Product, Sale
 from .serializers import CategorySerializer, ProductSerializer, SaleSerializer
-from django.shortcuts import render
-import csv
-from django.http import HttpResponse
-from .models import Product
-
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.response import Response
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-
 from .services import generate_daily_ai_report
-
-from rest_framework import filters
-
-from rest_framework import status
-from rest_framework.response import Response
+import csv
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs): # asl login jarayonini ishga tushiramiz

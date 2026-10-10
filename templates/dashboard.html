@@ -91,7 +91,7 @@
         <h3>Ombordagi mahsulotlar</h3>
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
             <input type="text" id="searchInput" class="search-box" placeholder="Mahsulot nomi bo'yicha qidirish..." onkeyup="searchProducts(this.value)">
-            <button onclick="loadProducts('/api/products/?archived=true')" style="background-color: #64748; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; white-space: nowrap;">📦 Arxiv</button>"
+            <button onclick="loadProducts('/api/products/?archived=true')" style="background-color: #64748b; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; white-space: nowrap;">📦 Arxiv</button>
             <button onclick="loadProducts('/api/products/')" style="background-color: #3b82f6; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; white-space: nowrap;">🟢 Faollarga qaytish</button>
         </div>
 
@@ -140,9 +140,7 @@
                 window.location.href = '/api/login-ui/';
                 return;
             }
-        } catch (err) {
-            console.error("Rolni aniqlashda xatolik:", err);
-        }
+        } catch (err) {}
 
         const addPanel = document.getElementById('addProductPanel');
         const catPanel = document.getElementById('categoryPanel');
@@ -218,22 +216,18 @@
                     }
                 });
             }
-        } catch (err) {
-            console.error("Xatolik:", err);
-        }
+        } catch (err) {}
     }
-    // YANI FUNKSIYA: Arxivdan tiklash
+
     async function restoreProduct(id) {
         if(confirm("Mahsulotni yana sotuvga (faol holatga) qaytaramizmi?")) {
             try {
-                // PATCH orqali is_active ni yana True qilib qo'yamiz
                 await fetch(`/api/products/${id}/`, {
                     method: 'PATCH',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ is_active: true })
                 });
-                // Tiklangach, arxiv oynasini qayta yuklaymiz
                 loadProducts('/api/products/?archived=true');
             } catch (err) {
                 alert("Server xatosi!");
@@ -256,9 +250,7 @@
                     catDiv.innerHTML += `<button class="cat-btn" onclick="filterByCategory('/api/products/?category=${c.id}', this)" style="background-color: #64748b; color: white; border: none; border-radius: 20px; padding: 8px 20px; cursor: pointer;">${c.name}</button>`;
                 });
             }
-        } catch (err) {
-            console.error("Xatolik:", err);
-        }
+        } catch (err) {}
     }
 
     function filterByCategory(url, clickedBtn) {
@@ -388,8 +380,6 @@
             reportEl.innerText = "Server xatosi.";
         }
     }
-
-
 
     checkUserRole();
     </script>

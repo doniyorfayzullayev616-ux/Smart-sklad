@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CategoryViewSet, ProductViewSet, SaleViewSet
-from .views import login_page, dashboard_page
-from store.views import check_user_role, get_ai_daily_report
-
+from .views import (
+    CategoryViewSet, ProductViewSet, SaleViewSet,
+    login_page, dashboard_page, check_user_role, get_ai_daily_report
+)
 
 
 # Router yaratamiz va viewlarimizni unga ro'yxatdan o'tkazamiz
