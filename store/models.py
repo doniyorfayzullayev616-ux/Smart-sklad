@@ -33,6 +33,7 @@ class Product(BaseModel):
     category = models.ForeignKey(Categories, on_delete=models.PROTECT, related_name='products')
     price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.00)])
     stock_quantity = models.PositiveIntegerField(validators=[MinValueValidator(0)])  #Ombor qoldig'i minusga kirmasligi shart.
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

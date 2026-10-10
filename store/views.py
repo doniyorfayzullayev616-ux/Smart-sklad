@@ -3,10 +3,12 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Categories, Product, Sale
 from .serializers import CategorySerializer, ProductSerializer, SaleSerializer
 from django.shortcuts import render
-from rest_framework import filters
 import csv
 from django.http import HttpResponse
 from .models import Product
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -14,7 +16,34 @@ from rest_framework.response import Response
 
 from .services import generate_daily_ai_report
 
+from rest_framework import filters
 
+from rest_framework import status
+from rest_framework.response import Response
+
+class CookieTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs): # asl login jarayonini ishga tushiramiz
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            access_token = response.data['access']
+
+            #tokenni httponly cookie ga joylaymiz(XSS hujumidan 100% himoya)
+            response.set_cookie(
+                key='access_token',
+                value=access_token,
+                httponly=True, # JavaScript orqali o'qishni taqiqlaydi
+                samesite='Lax', # boshqa saytlardan so'rov kelishini to'sadi
+                max_age=3600*24 # 1 kunga yaroqli
+            )
+            # xavfsizlik uchun tokenni ochiq javobdan (JSON dan) o'chirib tashlaymiz
+            del response.data['access']
+            if 'refresh' in response.data:
+                del response.data['refresh']
+
+            response.data['message'] = "Tizimga muvaffaqiyatli kirdingiz!"
+
+        return response
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Categories.objects.all()
@@ -31,11 +60,29 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        category_id = self.request.query_params.get('category')
 
+        if self.action in ['retrieve', 'update', 'partial_update','destroy']:
+            return queryset
+
+        is_archived = self.request.query_params.get('archived')
+        if is_archived == 'true':
+            queryset = queryset.filter(is_active=False)
+        else:
+            queryset = queryset.filter(is_active=True)
+
+        category_id = self.request.query_params.get('category')
         if category_id:
             queryset = queryset.filter(category_id = category_id)
+
         return queryset
+
+
+    def destroy(self, request, *args, **kwargs):
+        instance=self.get_object()
+        instance.is_active=False
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all()

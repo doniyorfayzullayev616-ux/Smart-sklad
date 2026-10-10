@@ -33,38 +33,35 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('error');
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('error');
 
-            errorDiv.textContent = "";
+        try {
+            // Django backend'dagi JWT login manziliga so'rov yuborish
+            const response = await fetch('/api/login/', {
+                method: 'POST',
+                credentials: 'include', // <--- MUHIM: Brauzerga maxfiy Cookie'ni qabul qilishga ruxsat beradi
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
 
-            try {
-                // Django backend'dagi JWT login manziliga so'rov yuborish
-                const response = await fetch('/api/login/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    // Kelgan access tokenni brauzer xotirasiga saqlab qo'yamiz
-                    localStorage.setItem('access_token', data.access);
-                    // Keyinchalik mahsulotlar sahifasiga yo'naltiramiz
-                    window.location.href = '/dashboard/';
-                } else {
-                    errorDiv.textContent = "Login yoki parol noto'g'ri!";
-                }
-            } catch (err) {
-                errorDiv.textContent = "Server bilan aloqada xatolik yuz berdi!";
+            if (response.ok) {
+                // DIQQAT: localStorage olib tashlandi! Token endi avtomat himoyalangan Cookie'da saqlanadi.
+                // To'g'ridan-to'g'ri boshqaruv paneliga yo'naltiramiz:
+                window.location.href = '/dashboard/';
+            } else {
+                errorDiv.textContent = "Login yoki parol noto'g'ri!";
             }
-        });
+        } catch (err) {
+            errorDiv.textContent = "Server bilan aloqada xatolik yuz berdi!";
+        }
+    });
     </script>
 </body>
 </html>

@@ -9,24 +9,25 @@ https://docs.djangoproject.com/en/6.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-n6fp23y=dvg-=*m2a2qgti1)a#5m4@c)*cd7%wtn!5ige8gi!)'
+SECRET_KEY = os.environ.get('SECRET_KEY','django-insecure-n6fp23y=dvg-=*m2a2qgti1)a#5m4@c)*cd7%wtn!5ige8gi!)')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -42,7 +43,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg'
-
 ]
 
 MIDDLEWARE = [
@@ -81,11 +81,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'smart_sklad_db',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres_pass',
-        'HOST': 'db', # Dockerdagi db servisi nomi
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'smart_sklad_db'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres_pass'),
+        'HOST': os.environ.get('DB_HOST', 'db'), # Dockerdagi db servisi nomi
+        'PORT': os.environ.get('DB_PORT','5432'),
     }
 }
 
@@ -139,7 +139,7 @@ AUTH_USER_MODEL = 'store.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'store.authentication.CookieJWTAuthentication',
     ),
     #Global pagination sozlash
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

@@ -21,8 +21,6 @@ services:
       - .env
     volumes:
       - .:/app
-    environment:
-      - DEBUG=True
     depends_on:
       - db
 

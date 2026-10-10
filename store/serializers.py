@@ -42,7 +42,7 @@ class SaleSerializer(serializers.ModelSerializer): # Ichma ich serializer: bitta
             total_amount = Decimal('0.00')
 
             for item_data in items_data:
-                product = item_data['product']
+                product = Product.objects.select_for_update().get(id=item_data['product'].id)
                 quantity = item_data['quantity']
 
                 # 1-qadam: Ombor qoldigini tekshirish (validation)

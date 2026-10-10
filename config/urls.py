@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
+from store.views import CookieTokenObtainPairView
 
 #Swagger uchun kerakli importlar
 from rest_framework import permissions
@@ -44,7 +45,7 @@ urlpatterns = [
 
     path('dashboard/', dashboard_page, name='dashboard'),
 
-    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/login/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('store.urls')),
 
@@ -52,4 +53,6 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/export/excel/', export_products_excel, name='export_excel'),
+
+    path('api/login/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
 ]
