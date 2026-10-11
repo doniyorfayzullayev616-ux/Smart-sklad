@@ -27,6 +27,7 @@ from drf_yasg import openapi
 from store.views import dashboard_page
 
 from store.views import export_products_excel
+from django.views.generic import RedirectView
 
 # API pasporti(malumotlari)
 schema_view = get_schema_view(
@@ -53,4 +54,5 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/export/excel/', export_products_excel, name='export_excel'),
+    path('', RedirectView.as_view(url='/swagger/'),
 ]
