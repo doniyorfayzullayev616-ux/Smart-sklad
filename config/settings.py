@@ -28,6 +28,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY','django-insecure-n6fp23y=dvg-=*m2a2qgti
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+CSRF_TRUSTED_ORIGINS = ['https://smart-sklad.onrender.com']
 
 
 # Application definition

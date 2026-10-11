@@ -10,13 +10,13 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres_pass
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     ports:
-      - "8000:8000"
+      - "8001:8000"
     env_file:
       - .env
     volumes:
