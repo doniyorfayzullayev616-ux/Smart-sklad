@@ -113,9 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'uz-uz'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 
@@ -145,9 +145,47 @@ REST_FRAMEWORK = {
     #Global pagination sozlash
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10, # har bir sahifada 10 tadan obyekt qaytadi
+    'DEFAULT_RENDERER_CLASSES': (
+        'store.renderers.CustomJSONRenderer',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/min',
+        'user': '60/min',
+        'ai_report': '5/hour'
+    }
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # asosiy kalit 1 kun yaroqli
     'REFRESH_TOKEN_LIFETIME': timedelta(days=3), # yangilovchi kalit 3 kun
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} | {levelname} | {modele} | {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'sklad.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'store': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True
+        },
+    },
 }

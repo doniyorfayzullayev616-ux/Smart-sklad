@@ -5,10 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import Categories, Product, Sale
+from .models import Category, Product, Sale
 from .serializers import CategorySerializer, ProductSerializer, SaleSerializer
 from .services import generate_daily_ai_report
 import csv
+from rest_framework.permissions import IsAdminUser
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs): # asl login jarayonini ishga tushiramiz
@@ -35,12 +36,12 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         return response
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Categories.objects.all()
+    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related('category').all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
 
@@ -74,9 +75,15 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class SaleViewSet(viewsets.ModelViewSet):
-    queryset = Sale.objects.all()
+    queryset = Sale.objects.select_related('cashier').prefetch_related('items__product').all()
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_permisisons(self):
+        if self.request.method in ['GET']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+
 
 
 def login_page(view):

@@ -68,8 +68,10 @@
                         <input type="text" id="newName" required>
                     </div>
                     <div class="form-group">
-                        <label>Kategoriya (ID)</label>
-                        <input type="number" id="newCategory" required>
+                        <label>Kategoriya</label>
+                        <select id="newCategory" required>
+                            <option value="">Kategoriyani tanlang...</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Narxi</label>
@@ -130,17 +132,22 @@
     let prevPageUrl = null;
     let searchTimer;
 
+    function getRealData(res) {
+        return (res && res.data !== undefined) ? res.data : res;
+        }
+
     async function checkUserRole() {
         try {
             const response = await fetch('/api/user-role/', { credentials: 'include' });
             if (response.ok) {
-                const data = await response.json();
+                const res = await response.json();
+                const data = getRealData(res);
                 isAdmin = data.is_admin;
             } else if (response.status === 401 || response.status === 403) {
                 window.location.href = '/api/login-ui/';
                 return;
             }
-        } catch (err) {}
+        } catch (err) { console.error("Rolda xatolik:", err); }
 
         const addPanel = document.getElementById('addProductPanel');
         const catPanel = document.getElementById('categoryPanel');
@@ -166,7 +173,9 @@
         try {
             const response = await fetch(url, { credentials: 'include' });
             if (response.ok) {
-                const data = await response.json();
+                const res = await response.json();
+                const data = getRealData(res);
+
                 nextPageUrl = data.next;
                 prevPageUrl = data.previous;
 
@@ -216,7 +225,7 @@
                     }
                 });
             }
-        } catch (err) {}
+        } catch (err) { console.error("Mahsulot yuklashda xatolik:", err); }
     }
 
     async function restoreProduct(id) {
@@ -238,16 +247,20 @@
 
     async function loadCategoriesList() {
         try {
-            const response = await fetch('/api/categories/', { credentials: 'include' });
+            const response = await fetch('/api/category/', { credentials: 'include' });
             if (response.ok) {
-                const data = await response.json();
+                const res = await response.json();
+                const data = getRealData(res);
                 const categories = data.results || data;
                 const catDiv = document.getElementById('categoryList');
+                const catSelect = document.getElementById('newCategory');
 
                 catDiv.innerHTML = `<button class="cat-btn" onclick="filterByCategory('/api/products/', this)" style="background-color: #3b82f6; color: white; border: none; border-radius: 20px; padding: 8px 20px; cursor: pointer;">Barcha mahsulotlar</button>`;
 
                 categories.forEach(c => {
                     catDiv.innerHTML += `<button class="cat-btn" onclick="filterByCategory('/api/products/?category=${c.id}', this)" style="background-color: #64748b; color: white; border: none; border-radius: 20px; padding: 8px 20px; cursor: pointer;">${c.name}</button>`;
+
+                    if (catSelect) catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
                 });
             }
         } catch (err) {}
@@ -274,7 +287,8 @@
                     }]
                 })
             });
-            const data = await response.json();
+            const res = await response.json();
+            const data = getRealData(res);
             if (response.ok) {
                 msgDiv.style.color = "#16a34a";
                 msgDiv.textContent = `Sotildi! Summa: ${data.total_amount} so'm`;
@@ -374,7 +388,8 @@
         reportEl.innerHTML = "⏳ Gemini tahlil qilmoqda...";
         try {
             const response = await fetch('/api/ai-report/', { credentials: 'include' });
-            const data = await response.json();
+            const res = await response.json();
+            const data = getRealData(res);
             reportEl.innerText = response.ok ? data.report : "Xatolik yuz berdi.";
         } catch (err) {
             reportEl.innerText = "Server xatosi.";

@@ -15,25 +15,26 @@ class User(AbstractUser):
 
 # Barcha modellar uchun umumiy vaqt maydonlari (DRY tamoyili)
 class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
 
 # Ombor bo'limi
-class Categories(BaseModel):
+class Category(BaseModel):
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
 
 class Product(BaseModel):
-    name = models.CharField(max_length=200)
-    category = models.ForeignKey(Categories, on_delete=models.PROTECT, related_name='products')
-    price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.00)])
+    name = models.CharField(max_length=200, db_index=True)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='products')
+    price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
     stock_quantity = models.PositiveIntegerField(validators=[MinValueValidator(0)])  #Ombor qoldig'i minusga kirmasligi shart.
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, db_index=True)
 
     def __str__(self):
         return self.name
@@ -47,7 +48,7 @@ class Sale(BaseModel):
     total_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f"Chek #{self.id} - {self.total_amount} UZS"
+        return f"Chek #{self.id}  {self.total_amount} UZS"
 
 class SaleItem(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')

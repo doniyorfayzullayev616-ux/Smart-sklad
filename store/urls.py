@@ -8,7 +8,7 @@ from .views import (
 
 # Router yaratamiz va viewlarimizni unga ro'yxatdan o'tkazamiz
 router = DefaultRouter()
-router.register(r'categories', CategoryViewSet)
+router.register(r'category', CategoryViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'sales', SaleViewSet) # Savdo API si qo'shildi
 

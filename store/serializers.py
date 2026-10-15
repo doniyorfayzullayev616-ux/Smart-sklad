@@ -1,13 +1,15 @@
 from rest_framework import serializers
-from .models import Categories, Product, Sale, SaleItem
+from .models import Category, Product, Sale, SaleItem
 
 from django.db import transaction
 from decimal import Decimal
+from django.shortcuts import get_object_or_404
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Categories
+        model = Category
         fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -36,13 +38,19 @@ class SaleSerializer(serializers.ModelSerializer): # Ichma ich serializer: bitta
         # so'rov yuborayotgan foydalanuvchini JWT tokendan olamiz
         user = self.context['request'].user
 
+        items_data = sorted(items_data, key=lambda x: x['product'].id)
         #tranzaksiyani boshlash
         with transaction.atomic(): #avval bosh chek sale yaratamiz
             sale = Sale.objects.create(cashier=user, total_amount=0, **validated_data)
             total_amount = Decimal('0.00')
 
             for item_data in items_data:
-                product = Product.objects.select_for_update().get(id=item_data['product'].id)
+                product = get_object_or_404(Product.objects.select_for_update(),id=item_data['product'].id)
+
+                if not product.is_active:
+                    raise serializers.ValidationError(
+                        f"Xatolik: '{product.name}' mahsuloti savdodan olingan. Uni sotish mumkin emas!"
+                    )
                 quantity = item_data['quantity']
 
                 # 1-qadam: Ombor qoldigini tekshirish (validation)
