@@ -6,27 +6,25 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Category, Product, Sale
-from .serializers import CategorySerializer, ProductSerializer, SaleSerializer
+from .serializers import CategorySerializer, ProductSerializer, SaleSerializer, SaleAuditSerializer
 from .services import generate_daily_ai_report
 import csv
 from rest_framework.permissions import IsAdminUser
 
 class CookieTokenObtainPairView(TokenObtainPairView):
-    def post(self, request, *args, **kwargs): # asl login jarayonini ishga tushiramiz
+    def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
 
         if response.status_code == 200:
             access_token = response.data['access']
 
-            #tokenni httponly cookie ga joylaymiz(XSS hujumidan 100% himoya)
             response.set_cookie(
                 key='access_token',
                 value=access_token,
-                httponly=True, # JavaScript orqali o'qishni taqiqlaydi
-                samesite='Lax', # boshqa saytlardan so'rov kelishini to'sadi
-                max_age=3600*24 # 1 kunga yaroqli
+                httponly=True,
+                samesite='Lax',
+                max_age=3600*24
             )
-            # xavfsizlik uchun tokenni ochiq javobdan (JSON dan) o'chirib tashlaymiz
             del response.data['access']
             if 'refresh' in response.data:
                 del response.data['refresh']
@@ -46,7 +44,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name']
+    search_fields = ['name', 'barcode']
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -64,6 +62,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         if category_id:
             queryset = queryset.filter(category_id = category_id)
 
+        barcode = self.request.query_params.get('barcode')
+        if barcode:
+            queryset=queryset.filter(barcode=barcode)
+
         return queryset
 
 
@@ -75,16 +77,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class SaleViewSet(viewsets.ModelViewSet):
-    queryset = Sale.objects.select_related('cashier').prefetch_related('items__product').all()
+    queryset = Sale.objects.select_related('cashier').prefetch_related('items__product').all().order_by('-created_at')
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
-
-    def get_permisisons(self):
-        if self.request.method in ['GET']:
-            return [IsAdminUser()]
-        return [IsAuthenticated()]
-
-
 
 def login_page(view):
     return render(view, 'login.html')
@@ -122,3 +117,10 @@ def get_ai_daily_report(request):
     report_text = generate_daily_ai_report()
     return Response({"report": report_text})
 
+class SaleAuditViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Sale.objects.select_related('cashier').prefetch_related('items__product').all().order_by('-created_at')
+    serializer_class = SaleAuditSerializer
+    permission_classes = [IsAdminUser]
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['cashier__username', 'id']

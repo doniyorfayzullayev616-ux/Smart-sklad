@@ -1,4 +1,6 @@
 import os
+import json
+import urllib.request
 from django.utils import timezone
 from django.db.models import Sum, F
 import google.generativeai as genai
@@ -7,6 +9,27 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+def send_telegram_notification(message):
+    token = os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = os.environ.get('TELEGRAM_ADMIN_ID')
+
+    if not token or not chat_id:
+        return
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        'chat_id': chat_id,
+        'text': message,
+        'parse_mode': 'HTML'
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
+    try:
+        urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        print(f"Telegram xabar yuborishda xatolik: {e}")
+
 
 
 class AiReportThrottle(UserRateThrottle):
@@ -29,7 +52,6 @@ if api_key:
 def generate_daily_ai_report():
     today = timezone.now().date()
 
-    # 1. Bugungi umumiy savdolar va tushum
     today_sales = SaleItem.objects.filter(sale__created_at__date=today)
 
 
@@ -47,11 +69,9 @@ def generate_daily_ai_report():
     top_selling_list = [f"{item['product__name']} ({item['total_qty']} ta)" for item in top_selling]
 
 
-    # 2. Qoldig'i 5 tadan kam qolgan tovarlar
     low_stock_products = Product.objects.filter(stock_quantity__lt=5).values_list('name', 'stock_quantity')
     low_stock_list = [f"{name} ({qty} dona)" for name, qty in low_stock_products]
 
-    # 3. Gemini uchun ixcham ma'lumotlar matni
     summary_context = f"""
     Bugungi sana: {today}
     Bugungi jami tushum: {total_revenue} so'm

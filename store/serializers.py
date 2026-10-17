@@ -4,6 +4,7 @@ from .models import Category, Product, Sale, SaleItem
 from django.db import transaction
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
+from .services import send_telegram_notification
 
 
 
@@ -79,5 +80,27 @@ class SaleSerializer(serializers.ModelSerializer): # Ichma ich serializer: bitta
             sale.total_amount = total_amount
             sale.save()
 
+            msg = f"🛒 <b>Yangi savdo amalga oshirildi!</b>\n\n"
+            msg += f"👤 Kassir: {user.username}\n"
+            msg += f"🧾 Chek raqami: #{sale.id}\n"
+            msg += f"💰 Jami summa: {total_amount:,.0f} UZS"
+
+            send_telegram_notification(msg)
+
             return sale
 
+class SaleItemAuditSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
+    class Meta:
+        model = SaleItem
+        fields = ['id', 'product_name', 'quantity', 'unit_price']
+
+class SaleAuditSerializer(serializers.ModelSerializer):
+    items = SaleItemAuditSerializer(many=True, read_only=True)
+    cashier_name=serializers.CharField(source='cashier.username', read_only=True, default="Noma'lum xodim")
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+
+    class Meta:
+        model = Sale
+        fields = ['id', 'cashier_name', 'total_amount', 'created_at', 'items']

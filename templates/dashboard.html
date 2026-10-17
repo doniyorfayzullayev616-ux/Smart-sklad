@@ -4,126 +4,211 @@
     <meta charset="UTF-8">
     <title>Smart-Sklad - Boshqaruv Paneli</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2, h3 { color: #1e293b; }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .panel { padding: 15px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 30px; }
-        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
-        th { background-color: #1e293b; color: white; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR (Yon menyu) */
+        .sidebar { width: 250px; background-color: #1e293b; color: white; display: flex; flex-direction: column; padding: 20px 0; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 10; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 22px; color: #38bdf8; letter-spacing: 1px; }
+        .menu-item { padding: 15px 25px; color: #cbd5e1; cursor: pointer; font-size: 16px; transition: 0.3s; display: flex; align-items: center; gap: 10px; border-left: 4px solid transparent; }
+        .menu-item:hover, .menu-item.active { background-color: #334155; color: white; border-left: 4px solid #38bdf8; }
+        .spacer { flex-grow: 1; }
+        .logout-btn { padding: 15px 25px; color: #f87171; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .logout-btn:hover { background-color: #334155; color: #ef4444; }
+
+        /* MAIN CONTENT (Asosiy qism) */
+        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* KPI KARTALAR */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .kpi-title { color: #64748b; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .kpi-value { color: #0f172a; font-size: 28px; font-weight: bold; }
+        .kpi-value.green { color: #10b981; }
+        .kpi-value.red { color: #ef4444; }
+
+        /* UMUMIY STILLAR */
+        h2, h3 { color: #1e293b; margin-top: 0; }
+        .panel { padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 20px; font-size: 14px; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; text-align: left; }
+        th { background-color: #f8fafc; color: #475569; font-weight: bold; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px; }
-        select, input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; }
-        button { padding: 10px 15px; background-color: #22c55e; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        button:hover { background-color: #16a34a; }
-        .btn-add { background-color: #3b82f6; }
-        .btn-add:hover { background-color: #2563eb; }
-        .btn-delete { background-color: #ef4444; padding: 5px 10px; font-size: 12px; }
-        .btn-delete:hover { background-color: #dc2626; }
-        .logout-btn { background-color: #ef4444; float: right; }
-        .success-msg { color: #16a34a; margin-top: 10px; font-weight: bold; font-size: 14px; }
-        .search-box { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 15px; }
+        label { display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 13px; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
+        select:focus, input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        button { padding: 10px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background-color: #2563eb; }
+        .btn-green { background-color: #10b981; } .btn-green:hover { background-color: #059669; }
+        .btn-red { background-color: #ef4444; padding: 6px 12px; font-size: 12px;} .btn-red:hover { background-color: #dc2626; }
+
+        /* Skroll bar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <button class="logout-btn" onclick="logout()">Chiqish</button>
-        <h2>Smart-Sklad Paneli</h2>
 
-        <div id="aiPanel" style="display: block; margin-top: 20px; margin-bottom: 25px; padding: 20px; border-radius: 8px; border-left: 5px solid #8b5cf6; background: #faf5ff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0; color: #6b21a8; font-size: 18px;">🤖 AI Kunlik Tahlilchi (Gemini)</h3>
-                <button type="button" onclick="fetchAiReport()" style="background-color: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">Hisobotni yangilash</button>
+    <div class="sidebar">
+        <h2>Smart-Sklad</h2>
+        <div class="menu-item active" onclick="switchTab('dashboard')">📊 Bosh sahifa</div>
+        <div class="menu-item" onclick="switchTab('pos')">🛒 Kassa (Sotish)</div>
+        <div class="menu-item" onclick="switchTab('inventory')">📦 Ombor (Baza)</div>
+        <div class="spacer"></div>
+        <div class="logout-btn" onclick="logout()">🚪 Tizimdan chiqish</div>
+    </div>
+
+    <!-- ASOSIY QISM -->
+    <div class="main-content">
+
+        <!-- ================= TAB 1: BOSH SAHIFA (DASHBOARD) ================= -->
+        <div id="dashboard" class="tab-content active">
+
+            <!-- KPI KARTALAR -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Bugungi tushum</div>
+                    <div class="kpi-value green" id="kpiTodayRevenue">0 UZS</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Jami Mahsulot Turlari</div>
+                    <div class="kpi-value" id="kpiTotalProducts">0 ta</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Kam qolgan tovarlar</div>
+                    <div class="kpi-value red" id="kpiLowStock">0 ta</div>
+                </div>
             </div>
-            <p id="aiReportText" style="margin-top: 15px; line-height: 1.6; color: #374151; font-size: 15px;">
-                Do'kondagi bugungi savdo holatini tahlil qilish uchun tugmani bosing.
-            </p>
-        </div>
 
-        <div class="grid-container">
+            <!-- AI PANELI (Faqat adminga ko'rinadi) -->
+            <div id="aiPanel" class="panel" style="display: none; border-left: 5px solid #8b5cf6; background: #faf5ff;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: #6b21a8; font-size: 18px;">🤖 AI Kunlik Tahlilchi (Gemini)</h3>
+                    <button type="button" onclick="fetchAiReport()" style="background-color: #8b5cf6;">Hisobotni yangilash</button>
+                </div>
+                <p id="aiReportText" style="margin-top: 15px; line-height: 1.6; color: #374151; font-size: 15px;">
+                    Do'kondagi bugungi savdo holatini tahlil qilish uchun tugmani bosing.
+                </p>
+            </div>
+
+            <!-- SAVDO TARIXI -->
             <div class="panel">
-                <h3>Kassa (Savdo qilish)</h3>
-                <form id="saleForm">
-                    <div class="form-group">
-                        <label>Mahsulotni tanlang</label>
-                        <select id="productId" required>
-                            <option value="">Yuklanmoqda...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Sotilish soni (Miqdor)</label>
-                        <input type="number" id="quantity" value="1" min="1" required>
-                    </div>
-                    <button type="submit">Chek Urish (Sotish)</button>
-                    <div id="saleMsg" class="success-msg"></div>
-                </form>
-            </div>
-
-            <div class="panel" id="addProductPanel" style="display: none;">
-                <h3>Yangi Mahsulot Qo'shish</h3>
-                <form id="addProductForm">
-                    <div class="form-group">
-                        <label>Nomi</label>
-                        <input type="text" id="newName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Kategoriya</label>
-                        <select id="newCategory" required>
-                            <option value="">Kategoriyani tanlang...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Narxi</label>
-                        <input type="number" step="0.01" id="newPrice" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Boshlang'ich qoldiq</label>
-                        <input type="number" id="newStock" required>
-                    </div>
-                    <button type="submit" class="btn-add">Baza qo'shish</button>
-                    <div id="addMsg" class="success-msg"></div>
-                </form>
+                <h3 style="margin-bottom: 15px;">Barcha tranzaksiyalar tarixi</h3>
+                <div id="salesHistoryBody" style="display: flex; flex-direction: column; max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                    <div style="text-align: center; color: #64748b; padding: 20px;">Yuklanmoqda...</div>
+                </div>
             </div>
         </div>
 
-        <h3>Kategoriyalar</h3>
-        <div id="categoryList" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;"></div>
+        <!-- ================= TAB 2: KASSA (POS) ================= -->
+        <div id="pos" class="tab-content">
 
-        <h3>Ombordagi mahsulotlar</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <input type="text" id="searchInput" class="search-box" placeholder="Mahsulot nomi bo'yicha qidirish..." onkeyup="searchProducts(this.value)">
-            <button onclick="loadProducts('/api/products/?archived=true')" style="background-color: #64748b; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; white-space: nowrap;">📦 Arxiv</button>
-            <button onclick="loadProducts('/api/products/')" style="background-color: #3b82f6; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; white-space: nowrap;">🟢 Faollarga qaytish</button>
+            <!-- Kassa Yuqori Qismi (Bugungi tushum ko'rsatkichi) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="margin: 0;">Kassa terminali</h2>
+                <div style="background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; font-size: 18px; font-weight: bold; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">
+                    Bugungi savdo: <span id="posTodayRevenue">0 UZS</span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+                <!-- CHAP TOMON: Savdo formasi -->
+                <div class="panel" style="border-top: 5px solid #10b981; margin-bottom: 0;">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: #10b981;">Yangi Xarid</h3>
+                    <form id="saleForm">
+                        <div class="form-group">
+                            <label>Mahsulotni qidiring / tanlang</label>
+                            <select id="productId" required>
+                                <option value="">Yuklanmoqda...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sotilish soni (Miqdor)</label>
+                            <input type="number" id="quantity" value="1" min="1" required>
+                        </div>
+                        <button type="submit" class="btn-green" style="width: 100%; padding: 12px; font-size: 16px; margin-top: 10px;">💳 Chek Urish (Sotish)</button>
+                        <div id="saleMsg" style="text-align: center; margin-top: 15px; font-weight: bold; font-size: 15px;"></div>
+                    </form>
+                </div>
+
+                <!-- O'NG TOMON: Kassirning o'z tarixi -->
+                <div class="panel" style="margin-bottom: 0; background: #f8fafc; display: flex; flex-direction: column; max-height: 400px;">
+                    <h3 style="margin-top: 0; font-size: 15px; color: #475569; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">🕒 Hozirgina sotilganlar</h3>
+                    <div id="posRecentSales" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px; overflow-y: auto; padding-right: 5px;">
+                        <div style="text-align: center; color: #94a3b8; padding: 20px;">Hali savdo qilinmadi</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nomi</th>
-                    <th>Kategoriya ID</th>
-                    <th>Narxi</th>
-                    <th>Qoldiq</th>
-                    <th id="actionHeader">Amal</th>
-                </tr>
-            </thead>
-            <tbody id="productTableBody"></tbody>
-        </table>
+        <!-- ================= TAB 3: OMBOR ================= -->
+        <div id="inventory" class="tab-content">
+            <h2 style="margin-bottom: 25px;">Ombor boshqaruvi</h2>
 
-        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-            <button id="prevBtn" onclick="loadProducts(prevPageUrl)" style="display: none;">⬅️ Oldingi</button>
-            <button id="nextBtn" onclick="loadProducts(nextPageUrl)" style="display: none;">Keyingi ➡️</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <!-- MAXSULOT QO'SHISH (Faqat Admin) -->
+                <div class="panel" id="addProductPanel" style="display: none;">
+                    <h3>Yangi Mahsulot Qo'shish</h3>
+                    <form id="addProductForm">
+                        <div class="form-group"><label>Nomi</label><input type="text" id="newName" required></div>
+                        <div class="form-group"><label>Kategoriya</label><select id="newCategory" required></select></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group"><label>Narxi</label><input type="number" step="0.01" id="newPrice" required></div>
+                            <div class="form-group"><label>Bosh. qoldiq</label><input type="number" id="newStock" required></div>
+                        </div>
+                        <button type="submit">Baza qo'shish</button>
+                        <div id="addMsg" style="color: #10b981; margin-top: 10px; font-weight: bold;"></div>
+                    </form>
+                </div>
+
+                <!-- KATEGORIYA QO'SHISH -->
+                <div id="categoryPanel" class="panel" style="display: none;">
+                    <h3>Kategoriya qo'shish</h3>
+                    <form id="categoryForm">
+                        <div class="form-group">
+                            <label>Kategoriya nomi</label>
+                            <input type="text" id="categoryName" placeholder="Masalan: Noutbuklar" required>
+                        </div>
+                        <button type="submit" class="btn-green">Qo'shish</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- JADVAL -->
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>Ombordagi mahsulotlar</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="searchInput" placeholder="Qidirish..." onkeyup="searchProducts(this.value)" style="width: 250px; padding: 8px;">
+                        <button onclick="loadProducts('/api/products/?archived=true')" style="background-color: #64748b;">📦 Arxiv</button>
+                        <button onclick="loadProducts('/api/products/')" class="btn-green">🟢 Faollar</button>
+                    </div>
+                </div>
+
+                <div id="categoryList" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;"></div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nomi</th>
+                            <th>Narxi</th>
+                            <th>Qoldiq</th>
+                            <th id="actionHeader">Amal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody"></tbody>
+                </table>
+                <div style="display: flex; gap: 10px;">
+                    <button id="prevBtn" onclick="loadProducts(prevPageUrl)" style="display: none; background: #64748b;">&larr; Oldingi</button>
+                    <button id="nextBtn" onclick="loadProducts(nextPageUrl)" style="display: none; background: #64748b;">Keyingi &rarr;</button>
+                </div>
+            </div>
         </div>
 
-        <div id="categoryPanel" class="category-box" style="display: none; margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-            <h4>Yangi kategoriya yaratish</h4>
-            <form id="categoryForm">
-                <input type="text" id="categoryName" placeholder="Masalan: Noutbuklar" required style="padding: 5px; width: 200px;">
-                <button type="submit" style="padding: 5px 15px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">Qo'shish</button>
-            </form>
-            <p id="catMessage" style="color: green; display: none; margin-top: 10px;">Kategoriya muvaffaqiyatli qo'shildi!</p>
-        </div>
     </div>
 
     <script>
@@ -132,9 +217,15 @@
     let prevPageUrl = null;
     let searchTimer;
 
-    function getRealData(res) {
-        return (res && res.data !== undefined) ? res.data : res;
-        }
+    // MENU TAB LOGIC
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function getRealData(res) { return (res && res.data !== undefined) ? res.data : res; }
 
     async function checkUserRole() {
         try {
@@ -149,26 +240,24 @@
             }
         } catch (err) { console.error("Rolda xatolik:", err); }
 
-        const addPanel = document.getElementById('addProductPanel');
-        const catPanel = document.getElementById('categoryPanel');
-        if (addPanel) addPanel.style.display = isAdmin ? 'block' : 'none';
-        if (catPanel) catPanel.style.display = isAdmin ? 'block' : 'none';
+        // Role-based ruxsatlar (Admin bo'lmasa AI paneli yashirinadi)
+        if (document.getElementById('addProductPanel')) document.getElementById('addProductPanel').style.display = isAdmin ? 'block' : 'none';
+        if (document.getElementById('categoryPanel')) document.getElementById('categoryPanel').style.display = isAdmin ? 'block' : 'none';
+        if (document.getElementById('aiPanel')) document.getElementById('aiPanel').style.display = isAdmin ? 'block' : 'none';
 
         loadProducts();
         loadCategoriesList();
+        loadSalesHistory();
     }
 
     function searchProducts(query) {
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => {
-            loadProducts(`/api/products/?search=${query}`);
-        }, 400);
+        searchTimer = setTimeout(() => { loadProducts(`/api/products/?search=${query}`); }, 400);
     }
 
     async function loadProducts(url = '/api/products/') {
         if (!url) return;
-
-        const isArchivedView=url.includes('archived=true');
+        const isArchivedView = url.includes('archived=true');
 
         try {
             const response = await fetch(url, { credentials: 'include' });
@@ -178,14 +267,9 @@
 
                 nextPageUrl = data.next;
                 prevPageUrl = data.previous;
-
-                const nextBtn = document.getElementById('nextBtn');
-                const prevBtn = document.getElementById('prevBtn');
-                if (nextBtn) nextBtn.style.display = nextPageUrl ? 'inline-block' : 'none';
-                if (prevBtn) prevBtn.style.display = prevPageUrl ? 'inline-block' : 'none';
-
-                const actionHeader = document.getElementById('actionHeader');
-                if (actionHeader) actionHeader.style.display = isAdmin ? '' : 'none';
+                if(document.getElementById('nextBtn')) document.getElementById('nextBtn').style.display = nextPageUrl ? 'inline-block' : 'none';
+                if(document.getElementById('prevBtn')) document.getElementById('prevBtn').style.display = prevPageUrl ? 'inline-block' : 'none';
+                if(document.getElementById('actionHeader')) document.getElementById('actionHeader').style.display = isAdmin ? '' : 'none';
 
                 const products = data.results || data;
                 const tbody = document.getElementById('productTableBody');
@@ -194,31 +278,36 @@
                 if(tbody) tbody.innerHTML = "";
                 if(saleSelect) saleSelect.innerHTML = '<option value="">Mahsulotni tanlang...</option>';
 
+                if(!isArchivedView && !url.includes('search=')) {
+                    document.getElementById('kpiTotalProducts').innerText = `${products.length} ta turlari`;
+                    const lowStockCount = products.filter(p => p.stock_quantity < 5).length;
+                    document.getElementById('kpiLowStock').innerText = `${lowStockCount} ta`;
+                }
+
                 products.forEach(p => {
                     if (saleSelect && !isArchivedView) {
-                        saleSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.price} so'm)</option>`;
+                        saleSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.price} so'm) - Qoldiq: ${p.stock_quantity}</option>`;
                     }
 
                     const isLowStock = p.stock_quantity < 5;
                     const stockColor = (isLowStock && !isArchivedView) ? "color: #ef4444;" : "color: #1e293b;";
-                    const alertIcon = (isLowStock && !isArchivedView) ? `<span style="font-size: 12px; margin-left: 5px; color: #ef4444;">⚠️ Kam!</span>` : "";
+                    const alertIcon = (isLowStock && !isArchivedView) ? `<span style="color: #ef4444;">⚠️ Kam</span>` : "";
 
                     let actionBtn = "";
                     if (isAdmin) {
                         if (isArchivedView) {
-                            actionBtn = `<button style="background-color: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="restoreProduct(${p.id})">♻️ Tiklash</button>`;
+                            actionBtn = `<button style="background-color: #f59e0b; padding: 6px 12px;" onclick="restoreProduct(${p.id})">♻️ Tiklash</button>`;
                         } else {
-                            actionBtn = `<button style="background-color: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;" onclick="addStock(${p.id}, ${p.stock_quantity})">+ Kirim</button>
-                                        <button class="btn-delete" onclick="deleteProduct(${p.id})">O'chirish</button>`;
+                            actionBtn = `<button class="btn-green" style="padding: 6px 12px; margin-right: 5px;" onclick="addStock(${p.id}, ${p.stock_quantity})">+ Kirim</button>
+                                        <button class="btn-red" onclick="deleteProduct(${p.id})">O'chirish</button>`;
                         }
                     }
                     if(tbody) {
-                        const rowStyle = isArchivedView ? "opacity: 0.6; text-decoration: line-through;" : "";
+                        const rowStyle = isArchivedView ? "opacity: 0.5;" : "";
                         tbody.innerHTML += `<tr style="${rowStyle}">
                             <td>${p.id}</td>
-                            <td>${p.name}</td>
-                            <td>${p.category}</td>
-                            <td>${p.price} so'm</td>
+                            <td>${p.name} <br><span style="font-size:11px; color:#64748b;">${p.category}</span></td>
+                            <td><b>${new Intl.NumberFormat('ru-RU').format(p.price)}</b> UZS</td>
                             <td style="${stockColor}"><b>${p.stock_quantity}</b> ${alertIcon}</td>
                             <td style="${isAdmin ? '' : 'display:none;'}">${actionBtn}</td>
                         </tr>`;
@@ -230,20 +319,10 @@
 
     async function restoreProduct(id) {
         if(confirm("Mahsulotni yana sotuvga (faol holatga) qaytaramizmi?")) {
-            try {
-                await fetch(`/api/products/${id}/`, {
-                    method: 'PATCH',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ is_active: true })
-                });
-                loadProducts('/api/products/?archived=true');
-            } catch (err) {
-                alert("Server xatosi!");
-            }
+            await fetch(`/api/products/${id}/`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ is_active: true }) });
+            loadProducts('/api/products/?archived=true');
         }
     }
-
 
     async function loadCategoriesList() {
         try {
@@ -255,21 +334,105 @@
                 const catDiv = document.getElementById('categoryList');
                 const catSelect = document.getElementById('newCategory');
 
-                catDiv.innerHTML = `<button class="cat-btn" onclick="filterByCategory('/api/products/', this)" style="background-color: #3b82f6; color: white; border: none; border-radius: 20px; padding: 8px 20px; cursor: pointer;">Barcha mahsulotlar</button>`;
-
+                catDiv.innerHTML = `<button onclick="filterByCategory('/api/products/')">Barchasi</button>`;
                 categories.forEach(c => {
-                    catDiv.innerHTML += `<button class="cat-btn" onclick="filterByCategory('/api/products/?category=${c.id}', this)" style="background-color: #64748b; color: white; border: none; border-radius: 20px; padding: 8px 20px; cursor: pointer;">${c.name}</button>`;
-
+                    catDiv.innerHTML += `<button style="background: #e2e8f0; color: #334155;" onclick="filterByCategory('/api/products/?category=${c.id}')">${c.name}</button>`;
                     if (catSelect) catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
                 });
             }
         } catch (err) {}
     }
 
-    function filterByCategory(url, clickedBtn) {
-        document.querySelectorAll('.cat-btn').forEach(btn => btn.style.backgroundColor = '#64748b');
-        clickedBtn.style.backgroundColor = '#3b82f6';
-        loadProducts(url);
+    function filterByCategory(url) { loadProducts(url); }
+
+    async function loadSalesHistory() {
+        try {
+            const response = await fetch('/api/sales/', {credentials: 'include' });
+            if (response.ok) {
+                const res = await response.json();
+                const data = getRealData(res);
+                let sales = data.results || data;
+
+                const tbody = document.getElementById('salesHistoryBody');
+                const posTbody = document.getElementById('posRecentSales'); // Kassa oynasi uchun
+
+                if (tbody) tbody.innerHTML = "";
+                if (posTbody) posTbody.innerHTML = "";
+
+                if (!sales || sales.length === 0) {
+                    if (tbody) tbody.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">Hali savdo amalga oshirilmagan.</div>';
+                    if (posTbody) posTbody.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">Hali savdo qilinmadi</div>';
+                    return;
+                }
+
+                sales.sort((a, b) => b.id - a.id);
+                let currentDateHeader = "";
+                const today = new Date();
+                const todayStr = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+
+                let todayRevenue = 0;
+                let posCount = 0; // Kassa oynasida nechta chek ko'rinishini sanaymiz
+
+                sales.forEach(sale => {
+                    const dateObj = new Date(sale.created_at || sale.date);
+                    const dateStr = `${String(dateObj.getDate()).padStart(2, '0')}.${String(dateObj.getMonth() + 1).padStart(2, '0')}.${dateObj.getFullYear()}`;
+                    const timeStr = dateObj.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+
+                    if(dateStr === todayStr) todayRevenue += parseFloat(sale.total_amount);
+
+                    let displayHeader = dateStr === todayStr ? "Bugun" : dateStr;
+
+                    // Dashboard uchun: Kunlik guruhlash
+                    if (dateStr !== currentDateHeader && tbody) {
+                        tbody.innerHTML += `<div style="background-color: #f8fafc; padding: 8px 12px; margin-top: 15px; margin-bottom: 5px; border-radius: 6px; font-weight: bold; font-size: 13px; color: #475569; border-left: 3px solid #3b82f6;">${displayHeader}</div>`;
+                        currentDateHeader = dateStr;
+                    }
+
+                    let detailsText = "Do'kon savdosi";
+                    if (sale.items && sale.items.length > 0) {
+                        detailsText = sale.items.map(item => `${item.product_name || item.name || "Mahsulot"} (${item.quantity} ta)`).join(', ');
+                    }
+                    const formattedPrice = new Intl.NumberFormat('ru-RU').format(Math.floor(sale.total_amount));
+
+                    // 1. Dashboard asosiy tarixiga qo'shish
+                    if(tbody) {
+                        tbody.innerHTML += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="background: white; color: #475569; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 1px solid #cbd5e1; flex-shrink: 0;">#${sale.id}</div>
+                                    <div style="max-width: 200px;">
+                                        <div style="font-weight: 600; color: #1e293b; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${detailsText}</div>
+                                        <div style="color: #64748b; font-size: 12px; margin-top: 3px;">${timeStr}</div>
+                                    </div>
+                                </div>
+                                <div style="font-weight: bold; color: #0f172a; font-size: 15px;">${formattedPrice} UZS</div>
+                            </div>
+                        `;
+                    }
+
+                    // 2. Kassa oynasiga qo'shish (Faqat eng oxirgi 15 tasi)
+                    if(posTbody && posCount < 15) {
+                        posTbody.innerHTML += `
+                            <div style="background: white; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                    <span style="font-weight: bold; color: #1e293b; font-size: 13px;">#${sale.id}</span>
+                                    <span style="font-weight: bold; color: #10b981; font-size: 14px;">${formattedPrice} UZS</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;" title="${detailsText}">${detailsText}</span>
+                                    <span style="font-size: 11px; color: #94a3b8;">${timeStr}</span>
+                                </div>
+                            </div>
+                        `;
+                        posCount++;
+                    }
+                });
+
+                // Dashboard va Kassa tushumlarini yangilash
+                if(document.getElementById('kpiTodayRevenue')) document.getElementById('kpiTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
+                if(document.getElementById('posTodayRevenue')) document.getElementById('posTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
+            }
+        } catch (err) { console.error("Tarix xatosi:", err); }
     }
 
     document.getElementById('saleForm').addEventListener('submit', async function(e) {
@@ -277,103 +440,57 @@
         const msgDiv = document.getElementById('saleMsg');
         try {
             const response = await fetch('/api/sales/', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    items: [{
-                        product: parseInt(document.getElementById('productId').value),
-                        quantity: parseInt(document.getElementById('quantity').value)
-                    }]
-                })
+                method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: [{ product: parseInt(document.getElementById('productId').value), quantity: parseInt(document.getElementById('quantity').value) }] })
             });
             const res = await response.json();
             const data = getRealData(res);
             if (response.ok) {
-                msgDiv.style.color = "#16a34a";
-                msgDiv.textContent = `Sotildi! Summa: ${data.total_amount} so'm`;
-                loadProducts();
+                msgDiv.style.color = "#10b981"; msgDiv.textContent = `✅ Sotildi! Summa: ${new Intl.NumberFormat('ru-RU').format(Math.floor(data.total_amount))} UZS`;
+                loadProducts(); loadSalesHistory(); document.getElementById('quantity').value = 1;
+
+                // 3 soniyadan so'ng muvaffaqiyatli yozuvini yashirish
+                setTimeout(() => { msgDiv.textContent = ""; }, 3000);
             } else {
-                msgDiv.style.color = "#ef4444";
-                msgDiv.textContent = data.detail || "Xatolik yuz berdi";
+                msgDiv.style.color = "#ef4444"; msgDiv.textContent = data.detail || "Xatolik yuz berdi";
             }
-        } catch (err) {
-            msgDiv.textContent = "Server xatosi!";
-        }
+        } catch (err) { msgDiv.textContent = "Server xatosi!"; }
     });
 
     document.getElementById('addProductForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const msgDiv = document.getElementById('addMsg');
-        const newProduct = {
-            name: document.getElementById('newName').value,
-            category: parseInt(document.getElementById('newCategory').value),
-            price: document.getElementById('newPrice').value,
-            stock_quantity: parseInt(document.getElementById('newStock').value)
-        };
         try {
             const response = await fetch('/api/products/', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newProduct)
+                method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: document.getElementById('newName').value, category: parseInt(document.getElementById('newCategory').value), price: document.getElementById('newPrice').value, stock_quantity: parseInt(document.getElementById('newStock').value) })
             });
             if (response.ok) {
-                msgDiv.style.color = "#16a34a";
-                msgDiv.textContent = "Mahsulot bazaga qo'shildi!";
+                document.getElementById('addMsg').textContent = "Mahsulot qo'shildi!";
                 document.getElementById('addProductForm').reset();
                 loadProducts();
             }
-        } catch (err) {
-            msgDiv.textContent = "Server xatosi!";
-        }
+        } catch (err) {}
     });
 
     async function deleteProduct(id) {
-        if(confirm("Rostdan ham bu mahsulotni o'chirmoqchimisiz?")) {
-            try {
-                const response = await fetch(`/api/products/${id}/`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-                if(response.ok || response.status === 204) {
-                    loadProducts();
-                } else {
-                    alert("O'chirishda xatolik yuz berdi.");
-                }
-            } catch (err) {
-                alert("Server xatosi!");
-            }
+        if(confirm("O'chiramizmi?")) {
+            await fetch(`/api/products/${id}/`, { method: 'DELETE', credentials: 'include' });
+            loadProducts();
         }
     }
 
     async function addStock(id, currentStock) {
-        let amount = prompt("Omborga nechta mahsulot keldi?");
+        let amount = prompt("Nechta keldi?");
         if (amount && parseInt(amount) > 0) {
-            try {
-                await fetch(`/api/products/${id}/`, {
-                    method: 'PATCH',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stock_quantity: currentStock + parseInt(amount) })
-                });
-                loadProducts();
-            } catch (err) {
-                alert("Server xatosi!");
-            }
+            await fetch(`/api/products/${id}/`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stock_quantity: currentStock + parseInt(amount) }) });
+            loadProducts();
         }
     }
 
-    const catForm = document.getElementById('categoryForm');
-    if(catForm) {
-        catForm.addEventListener('submit', async function(e) {
+    if(document.getElementById('categoryForm')) {
+        document.getElementById('categoryForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            await fetch('/api/categories/', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: document.getElementById('categoryName').value })
-            });
+            await fetch('/api/categories/', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('categoryName').value }) });
             window.location.reload();
         });
     }
@@ -384,16 +501,12 @@
     }
 
     async function fetchAiReport() {
-        const reportEl = document.getElementById('aiReportText');
-        reportEl.innerHTML = "⏳ Gemini tahlil qilmoqda...";
+        document.getElementById('aiReportText').innerHTML = "⏳ Gemini tahlil qilmoqda...";
         try {
             const response = await fetch('/api/ai-report/', { credentials: 'include' });
             const res = await response.json();
-            const data = getRealData(res);
-            reportEl.innerText = response.ok ? data.report : "Xatolik yuz berdi.";
-        } catch (err) {
-            reportEl.innerText = "Server xatosi.";
-        }
+            document.getElementById('aiReportText').innerText = response.ok ? getRealData(res).report : "Xatolik.";
+        } catch (err) {}
     }
 
     checkUserRole();

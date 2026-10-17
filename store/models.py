@@ -35,6 +35,7 @@ class Product(BaseModel):
     price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
     stock_quantity = models.PositiveIntegerField(validators=[MinValueValidator(0)])  #Ombor qoldig'i minusga kirmasligi shart.
     is_active = models.BooleanField(default=True, db_index=True)
+    barcode = models.CharField(max_length=50, unique=True, null=True, blank=True, verbose_name="Shtrix-kod")
 
     def __str__(self):
         return self.name
