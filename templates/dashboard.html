@@ -326,7 +326,7 @@
 
     async function loadCategoriesList() {
         try {
-            const response = await fetch('/api/category/', { credentials: 'include' });
+            const response = await fetch('/api/categories/', { credentials: 'include' });
             if (response.ok) {
                 const res = await response.json();
                 const data = getRealData(res);
@@ -490,7 +490,7 @@
     if(document.getElementById('categoryForm')) {
         document.getElementById('categoryForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            await fetch('/api/category/', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('categoryName').value }) });
+            await fetch('/api/categories/', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('categoryName').value }) });
             window.location.reload();
         });
     }
