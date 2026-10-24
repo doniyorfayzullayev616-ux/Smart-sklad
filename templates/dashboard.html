@@ -429,7 +429,7 @@
                 });
 
                 // Dashboard va Kassa tushumlarini yangilash
-                const totalRevenue = data.today_revenue !== undefined ? data.today_revenue : 0;
+                const totalRevenue = data.today_revenue !== undefined ? data.today_revenue : todayRevenue;
 
                 if(document.getElementById('kpiTodayRevenue')) {
                     document.getElementById('kpiTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
