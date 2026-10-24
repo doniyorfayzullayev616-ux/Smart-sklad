@@ -11,6 +11,8 @@ from .services import generate_daily_ai_report
 import csv
 from django.utils import timezone
 from django.db.models import Sum
+import os
+import requests
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
@@ -77,9 +79,32 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class SaleViewSet(viewsets.ModelViewSet):
-    queryset = Sale.objects.all()
+    queryset = Sale.objects.all().order_by('-created_at')
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        sale = serializer.save(cashier=self.request.user)
+
+        token = os.getenv('TELEGRAM_BOT_TOKEN')
+        chat_id = os.getenv('TELEGRAM_CHAT_ID')
+
+        if token and chat_id:
+            items_text = ", ".join([f"{item.product.name} ({item.quantity} ta)" for item in sale.items.all()])
+            message = (
+                f"🛒 Yangi savdo amalga oshirildi!\n\n"
+                f"👤 Kassir: {sale.cashier.username}\n"
+                f"🧾 Chek raqami: #{sale.id}\n"
+                f"📦 Mahsulotlar: {items_text}\n"
+                f"💰 Jami summa: {int(sale.total_amount):,} UZS"
+            )
+            try:
+                requests.post(
+                    f"https://api.telegram.org/bot{token}/sendMessage",
+                    json={"chat_id": chat_id, "text": message}
+                )
+            except Exception as e:
+                print("Telegram xatoligi:", e)
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)

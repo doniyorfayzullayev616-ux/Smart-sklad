@@ -6,7 +6,7 @@ from .models import Product, SaleItem
 
 def generate_daily_ai_report():
     api_key = os.getenv('GEMINI_API_KEY')
-    if api_key:
+    if not api_key:
         return "Gemini API kaliti topilmadi"
 
     client = genai.Client(api_key=api_key)
