@@ -83,7 +83,7 @@ class SaleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        sale = serializer.save(cashier=self.request.user)
+        sale = serializer.save()
 
         try:
             token = os.getenv('TELEGRAM_BOT_TOKEN')
