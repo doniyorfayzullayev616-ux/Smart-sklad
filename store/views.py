@@ -83,28 +83,35 @@ class SaleViewSet(viewsets.ModelViewSet):
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        sale = serializer.save(cashier=self.request.user)
+        def perform_create(self, serializer):
+            sale = serializer.save(cashier=self.request.user)
 
-        token = os.getenv('TELEGRAM_BOT_TOKEN')
-        chat_id = os.getenv('TELEGRAM_CHAT_ID')
-
-        if token and chat_id:
-            items_text = ", ".join([f"{item.product.name} ({item.quantity} ta)" for item in sale.items.all()])
-            message = (
-                f"🛒 Yangi savdo amalga oshirildi!\n\n"
-                f"👤 Kassir: {sale.cashier.username}\n"
-                f"🧾 Chek raqami: #{sale.id}\n"
-                f"📦 Mahsulotlar: {items_text}\n"
-                f"💰 Jami summa: {int(sale.total_amount):,} UZS"
-            )
+            # Telegramga xabar yuborish (xatolik bo'lsa ham savdo to'xtab qolmasligi uchun try-except ichida)
             try:
-                requests.post(
-                    f"https://api.telegram.org/bot{token}/sendMessage",
-                    json={"chat_id": chat_id, "text": message}
-                )
+                import os
+                import requests
+                token = os.getenv('TELEGRAM_BOT_TOKEN')
+                chat_id = os.getenv('TELEGRAM_CHAT_ID')
+
+                if token and chat_id:
+                    # sale.items yoki sale.saleitem_set xavfsiz aniqlash
+                    items = sale.items.all() if hasattr(sale, 'items') else sale.saleitem_set.all()
+                    items_text = ", ".join([f"{item.product.name} ({item.quantity} ta)" for item in items])
+
+                    message = (
+                        f"🛒 Yangi savdo amalga oshirildi!\n\n"
+                        f"👤 Kassir: {sale.cashier.username if sale.cashier else 'Noma\'lum'}\n"
+                        f"🧾 Chek raqami: #{sale.id}\n"
+                        f"📦 Mahsulotlar: {items_text}\n"
+                        f"💰 Jami summa: {int(sale.total_amount):,} UZS"
+                    )
+                    requests.post(
+                        f"https://api.telegram.org/bot{token}/sendMessage",
+                        json={"chat_id": chat_id, "text": message},
+                        timeout=5
+                    )
             except Exception as e:
-                print("Telegram xatoligi:", e)
+                print("Telegram xatoligi (savdoga ta'sir qilmaydi):", e)
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
