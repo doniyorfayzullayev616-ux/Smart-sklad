@@ -429,8 +429,14 @@
                 });
 
                 // Dashboard va Kassa tushumlarini yangilash
-                if(document.getElementById('kpiTodayRevenue')) document.getElementById('kpiTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
-                if(document.getElementById('posTodayRevenue')) document.getElementById('posTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
+                const totalRevenue = data.today_revenue !== undefined ? data.today_revenue : 0;
+
+                if(document.getElementById('kpiTodayRevenue')) {
+                    document.getElementById('kpiTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
+                }
+                if(document.getElementById('posTodayRevenue')) {
+                    document.getElementById('posTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
+                }
             }
         } catch (err) { console.error("Tarix xatosi:", err); }
     }

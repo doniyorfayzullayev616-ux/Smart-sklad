@@ -4,12 +4,13 @@ from django.db.models import Sum, F
 from google import genai
 from .models import Product, SaleItem
 
-api_key = os.getenv('GEMINI_API_KEY')
-if api_key:
-    genai.configure(api_key=api_key)
-
-
 def generate_daily_ai_report():
+    api_key = os.getenv('GEMINI_API_KEY')
+    if api_key:
+        return "Gemini API kaliti topilmadi"
+
+    client = genai.Client(api_key=api_key)
+
     today = timezone.now().date()
 
     # 1. Bugungi umumiy savdolar va tushum
@@ -46,8 +47,10 @@ def generate_daily_ai_report():
     """
 
     try:
-        model = genai.GenerativeModel('gemini-3.8-flash')
-        response = model.generate_content(prompt)
+        response = model.generate_content(
+            model='gemini-3.8-flash',
+            contents=prompt,
+        )
         return response.text
     except Exception as e:
         return f"Hisobot shakllantirishda xatolik: {str(e)}"

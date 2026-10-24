@@ -9,6 +9,9 @@ from .models import Categories, Product, Sale
 from .serializers import CategorySerializer, ProductSerializer, SaleSerializer
 from .services import generate_daily_ai_report
 import csv
+from django.utils import timezone
+from django.db.models import Sum
+
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs): # asl login jarayonini ishga tushiramiz
@@ -77,6 +80,18 @@ class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        today = timezone.now().date()
+        today_sales = Sale.objects.filter(created_at__date=today)
+        total_today = today_sales.aggregate(total=Sum('total_amount'))['total'] or 0
+
+        if isinstance(response.data, dict):
+            response.data['today_revenue'] = total_today
+
+        return response
 
 
 def login_page(view):
