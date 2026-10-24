@@ -1,7 +1,7 @@
 import os
 from django.utils import timezone
 from django.db.models import Sum, F
-import google.generativeai as genai
+from google import genai
 from .models import Product, SaleItem
 
 api_key = os.getenv('GEMINI_API_KEY')
