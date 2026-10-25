@@ -432,10 +432,10 @@
                 const totalRevenue = data.today_revenue !== undefined ? data.today_revenue : todayRevenue;
 
                 if(document.getElementById('kpiTodayRevenue')) {
-                    document.getElementById('kpiTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
+                    document.getElementById('kpiTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(totayRevenue))} UZS`;
                 }
                 if(document.getElementById('posTodayRevenue')) {
-                    document.getElementById('posTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(todayRevenue))} UZS`;
+                    document.getElementById('posTodayRevenue').innerText = `${new Intl.NumberFormat('ru-RU').format(Math.floor(totayRevenue))} UZS`;
                 }
             }
         } catch (err) { console.error("Tarix xatosi:", err); }
