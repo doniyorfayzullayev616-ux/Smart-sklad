@@ -87,7 +87,7 @@ class SaleViewSet(viewsets.ModelViewSet):
 
         try:
             token = os.getenv('TELEGRAM_BOT_TOKEN')
-            chat_id = os.getenv('TELEGRAM_CHAT_ID')
+            chat_id = os.getenv('TELEGRAM_ADMIN_ID')
 
             if token and chat_id:
                 items = sale.items.all() if hasattr(sale, 'items') else sale.saleitem_set.all()
