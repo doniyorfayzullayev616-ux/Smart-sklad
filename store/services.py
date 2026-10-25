@@ -47,7 +47,7 @@ def generate_daily_ai_report():
     """
 
     try:
-        response = model.generate_content(
+        response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,
         )
