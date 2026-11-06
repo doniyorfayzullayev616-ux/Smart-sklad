@@ -39,9 +39,8 @@ schema_view = get_schema_view(
         description='Omborxona va savdo boshqaruvi tizimi uchun rasmiy API hujjatlari',
         contact=openapi.Contact(email="admin@smartsklad.uz"),
     ),
-    public=False,
-    permission_classes=(permissions.IsAdminUser,),
-    authentication_classes=(SessionAuthentication,),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
