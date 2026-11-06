@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', 'smart_sklad_db'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres_pass'),
-        'HOST': os.environ.get('DB_HOST', 'db'), # Dockerdagi db servisi nomi
+        'HOST': os.environ.get('DB_HOST', 'localhost'), # Dockerdagi db servisi nomi
         'PORT': os.environ.get('DB_PORT','5432'),
     }
 }
