@@ -29,6 +29,7 @@ from store.views import dashboard_page, login_page
 from store.views import export_products_excel
 from django.views.generic import RedirectView
 from django.contrib.auth import views as auth_views
+from rest_framework.authentication import SessionAuthentication
 
 # API pasporti(malumotlari)
 schema_view = get_schema_view(
@@ -40,6 +41,7 @@ schema_view = get_schema_view(
     ),
     public=False,
     permission_classes=(permissions.IsAdminUser,),
+    authentication_classes=(SessionAuthentication,),
 )
 
 urlpatterns = [
