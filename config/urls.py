@@ -49,11 +49,12 @@ urlpatterns = [
     path('api/login/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('store.urls')),
+    path('api/export/excel/', export_products_excel, name='export_excel'),
 
     #Swagger URL manzillari
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('api/export/excel/', export_products_excel, name='export_excel'),
-    path('', RedirectView.as_view(url='/dashboard/')),
+
+    path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
 
 ]
