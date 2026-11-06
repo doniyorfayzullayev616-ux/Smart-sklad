@@ -38,8 +38,8 @@ schema_view = get_schema_view(
         description='Omborxona va savdo boshqaruvi tizimi uchun rasmiy API hujjatlari',
         contact=openapi.Contact(email="admin@smartsklad.uz"),
     ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
+    public=False,
+    permission_classes=(permissions.IsAdminUser,),
 )
 
 urlpatterns = [
@@ -58,6 +58,6 @@ urlpatterns = [
 
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('accounts/login/', login_page, name='login'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='admin/login.html'), name='login'),
 
 ]
