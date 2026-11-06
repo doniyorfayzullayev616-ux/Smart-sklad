@@ -28,6 +28,7 @@ from store.views import dashboard_page
 
 from store.views import export_products_excel
 from django.views.generic import RedirectView
+from django.contrib.auth import views as auth_views
 
 # API pasporti(malumotlari)
 schema_view = get_schema_view(
@@ -56,5 +57,6 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 
 ]
