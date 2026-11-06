@@ -24,7 +24,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from store.views import dashboard_page
+from store.views import dashboard_page, login_page
 
 from store.views import export_products_excel
 from django.views.generic import RedirectView
@@ -58,6 +58,6 @@ urlpatterns = [
 
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('accounts/login/', login_page, name='login'),
 
 ]
