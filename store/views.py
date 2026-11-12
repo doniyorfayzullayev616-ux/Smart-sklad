@@ -5,12 +5,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated
 from .models import Categories, Product, Sale
 from .serializers import CategorySerializer, ProductSerializer, SaleSerializer
 from .services import generate_daily_ai_report
 import csv
 from django.utils import timezone
+from django.db import transaction
 from django.db.models import Sum
+from .permissions import IsAdminOrReadOnly
 import os
 import requests
 
@@ -46,7 +49,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
@@ -71,9 +74,20 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
     def destroy(self, request, *args, **kwargs):
+        print("destroy funksiyasi ishladi")
         instance=self.get_object()
-        instance.is_active=False
-        instance.save()
+
+        with transaction.atomic():
+
+            for sale_item in instance.items.all():
+                mahsulot = sale_item.product
+                print(f"qaytayotgan tovar {mahsulot.name}, {sale_item}")
+
+                mahsulot.stock_quantity += sale_item.quantity
+                mahsulot.save()
+
+            instance.is_active=False
+            instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -81,6 +95,20 @@ class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all().order_by('-created_at')
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        print("destroy ishladi")
+        instance = self.get_object()
+
+        with transaction.atomic():
+            for sale_item in instance.items.all():
+                mahsulot = sale_item.product
+                mahsulot.stock_quantity += sale_item.quantity
+                mahsulot.save()
+            instance.is_active = False
+            instance.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
         sale = serializer.save()
@@ -127,6 +155,8 @@ def login_page(view):
 def dashboard_page(request):
     return render(request, 'dashboard.html')
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def export_products_excel(request):
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="Sklad_Hisobot.csv"'
