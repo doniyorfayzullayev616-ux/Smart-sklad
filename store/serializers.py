@@ -22,8 +22,13 @@ class SaleItemSerializer(serializers.ModelSerializer):
         # unit_price frontenddan kelmaydi, uni o'zimiz backendda beramiz
         read_only_fields = ['unit_price']
 
+    def validate_product(self, value):
+        if not value.is_active:
+            raise serializers.ValidationError("Xato: Mahsulot arxivlangan, sotuvda yo'q")
+        return value
+
 class SaleSerializer(serializers.ModelSerializer): # Ichma ich serializer: bitta chek ichida bir necha tovarlar ro'yxati
-    items = SaleItemSerializer(many=True)
+    items = SaleItemSerializer(many=True, allow_empty=False)
 
     class Meta:
         model = Sale

@@ -25,7 +25,7 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'False'
 
 ALLOWED_HOSTS = ['smart-sklad.uz', 'www.smart-sklad.uz', 'localhost', '127.0.0.1', '*']
 CSRF_TRUSTED_ORIGINS = ['https://smart-sklad.onrender.com']
@@ -143,6 +143,15 @@ REST_FRAMEWORK = {
         'store.authentication.CookieJWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',
+        'user': '100/minute'
+    },
+
     #Global pagination sozlash
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10, # har bir sahifada 10 tadan obyekt qaytadi
@@ -152,3 +161,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # asosiy kalit 1 kun yaroqli
     'REFRESH_TOKEN_LIFETIME': timedelta(days=3), # yangilovchi kalit 3 kun
 }
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_SAMESITE = 'Strict'

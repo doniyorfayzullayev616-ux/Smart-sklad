@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework import viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
@@ -186,3 +188,18 @@ def get_ai_daily_report(request):
 
     report_text = generate_daily_ai_report()
     return Response({"report": report_text})
+
+class LogoutView(APIView):
+    """
+    Foydalanuvchini tizimdan chiqarish va JWT cookielarni tozalash
+    """
+    def post(self, request):
+        response = Response(
+            {"xabar": "Tizimdan muvaffaqiyatli chiqildi!"},
+            status=status.HTTP_200_OK
+        )
+
+        response.delete_cookie('access')
+        response.delete_cookie('refresh')
+
+        return response

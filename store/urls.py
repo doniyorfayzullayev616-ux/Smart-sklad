@@ -18,5 +18,6 @@ urlpatterns = [
     path('dashboard/', dashboard_page, name='dashboard'),
     path('user-role/', check_user_role, name='user-role'),
     path('ai-report/', get_ai_daily_report, name='ai-report'),
+
 ]
 

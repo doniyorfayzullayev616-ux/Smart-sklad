@@ -2,22 +2,24 @@
 
 Smart-Sklad — bu do'kon va omborxonalar uchun mahsulotlarni, kassa jarayonlarini va ombor qoldiqlarini boshqarishga mo'ljallangan ishonchli, xavfsiz va to'liq avtomatlashtirilgan tizim. Loyiha zamonaviy biznes ehtiyojlarini hisobga olgan holda ishlab chiqilgan va Docker muhitiga qadoqlangan.
 
+> ⚠️ **MUHIM OGOHLANTIRISH (ARXITEKTURA):**
+> Ushbu loyihada kassa jarayonlarida (bir vaqtda sotishning oldini olish uchun) tranzaksiyalar xavfsizligi va qoldiqlar blokirovkasi (`select_for_update`) to'liq qo'llanilgan. Shu sababli, loyihani standart SQLite faylli bazasida **EMAS**, albatta Docker orqali (PostgreSQL bilan) ishga tushirish qat'iyan talab etiladi. SQLite bu blokirovkalarni to'g'ri o'qiy olmaydi.
+
 ## 🚀 Asosiy Imkoniyatlar (Features)
 
-- **AI Kunlik Tahlilchi (Gemini):** Sun'iy intellekt orqali kunlik savdolar va ombor qoldiqlari bo'yicha avtomatik biznes-tahlil va xulosalar.
-- **Xavfsiz Avtorizatsiya (Cookie JWT):** XSS hujumlaridan 100% himoyalangan, JWT tokenlarni faqat `HttpOnly` cookie'larda saqlovchi zamonaviy xavfsizlik tizimi.
-- **Ma'lumotlar Butunligi (Soft Delete):** Mahsulotlarni bazadan butunlay o'chirib yubormasdan "Arxivlash" (is_active) orqali kassa tarixini saqlab qolish mantiqi.
-- **Kassa va Tranzaksiyalar:** Kassa jarayonlarida xatoliklarni oldini olish uchun `transaction.atomic` yordamida ishonchli savdo amaliyotlari.
-- **Optimallashtirilgan API:** Katta hajmdagi ma'lumotlar serverni qotirib qo'ymasligi uchun Pagination va SearchFilter.
-- **Interaktiv UI:** Vanilla JavaScript va Fetch API orqali sahifani yangilamasdan ishlaydigan tezkor (SPA uslubidagi) frontend qismi.
-- **Hisobot (Export):** Ombor qoldiqlarini Excel (CSV) formatida ko'chirib olish.
+- **AI Kunlik Tahlilchi (Gemini 1.5 Flash):** Sun'iy intellekt orqali kunlik savdolar va ombor qoldiqlari bo'yicha "dead stock" va "low stock" kabi holatlarni hisobga oluvchi avtomatik biznes-tahlil.
+- **Xavfsiz Avtorizatsiya (Cookie JWT):** XSS va CSRF hujumlaridan 100% himoyalangan (`Samesite=Strict`), JWT tokenlarni faqat `Secure` va `HttpOnly` cookie'larda saqlovchi zamonaviy xavfsizlik tizimi.
+- **Brute-Force Himoyasi (Throttling):** API ga qilingan spam va xakerlik so'rovlarini avtomatik cheklovchi tizim (Anon va User rate limits).
+- **Ma'lumotlar Butunligi (Soft Delete):** Mahsulotlarni o'chirmasdan "Arxivlash" va bekor qilingan cheklardagi tovarlarni omborga avtomatik qaytarish mantiqi.
+- **Kassa va Tranzaksiyalar:** Xatoliklarni oldini olish uchun `transaction.atomic` yordamida ishonchli savdo amaliyotlari.
+- **Hisobot (Export):** Ombor qoldiqlarini faqat vakolatli xodimlar uchun Excel (CSV) formatida eksport qilish.
 
 ## 🛠 Texnologiyalar (Tech Stack)
 
-- **Backend:** Python 3.12, Django, Django REST Framework
+- *- **Backend:** Python 3.12, Django 5.x, Django REST Framework
 - **Frontend:** HTML, CSS, Vanilla JavaScript
 - **Ma'lumotlar bazasi:** PostgreSQL 15
-- **Avtorizatsiya:** djangorestframework-simplejwt (HttpOnly Cookie)
+- **Avtorizatsiya:** djangorestframework-simplejwt
 - **Sun'iy Intellekt:** Google Gemini API
 - **Infratuzilma:** Docker, Docker Compose
 

@@ -144,3 +144,55 @@ class SaleTransaction(TestCase):
 
         self.mahsulot.refresh_from_db()
         self.assertNotEqual(self.mahsulot.price, 100)
+
+    def test_create_sale_empty_items(self):
+        """3-hujum: Kassir hech qanday tovarsiz, bo'sh chek yaratmoqchi"""
+        self.client.force_authenticate(user=self.kassir)
+
+        payload = {
+            "items": []
+        }
+        url = "/api/sales/"
+        response = self.client.post(url, data=payload, format="json")
+
+        print(f"\n-- Bo'sh chekka tizim javobi: {response.status_code} ---")
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_sale_archived_product(self):
+        """4-hujum: Kassir arxivdagi faol bo'lmagan tovarni sotmoqchi"""
+        self.client.force_authenticate(user=self.kassir)
+
+        self.mahsulot.is_active = False
+        self.mahsulot.save()
+
+        payload = {
+            "items": [
+                {
+                    "product": self.mahsulot.id,
+                    "quantity": 1
+                }
+            ]
+        }
+        url = "/api/sales/"
+        response = self.client.post(url, data=payload, format="json")
+
+        print(f"\n-- Arxiv tovar savdosiga javob: {response.status_code} ---")
+        if response.status_code == 400:
+            print(f"--- Xato matni: {response.data} ---")
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_logout_clears_cookies(self):
+        """5-qadam: Tizimdan chiqish (Logout)"""
+
+        url = "/api/logout/"
+        response = self.client.post(url)
+
+        print(f"\n-- Logout javobi: {response.status_code} ---")
+
+        self.assertEqual(response.status_code, 200)
+
+
+        self.assertTrue('access' in response.cookies)
+        self.assertEqual(response.cookies['access'].value, '')

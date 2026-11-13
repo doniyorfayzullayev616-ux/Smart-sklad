@@ -26,7 +26,7 @@ from drf_yasg import openapi
 
 from store.views import dashboard_page, login_page
 
-from store.views import export_products_excel
+from store.views import export_products_excel, LogoutView
 from django.views.generic import RedirectView
 from django.contrib.auth import views as auth_views
 from rest_framework.authentication import SessionAuthentication
@@ -52,6 +52,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('store.urls')),
     path('api/export/excel/', export_products_excel, name='export_excel'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
 
     #Swagger URL manzillari
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
