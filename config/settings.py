@@ -165,3 +165,5 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Strict'
 CSRF_COOKIE_SAMESITE = 'Strict'
+
+CSRF_TRUSTED_ORIGINS = ['[https://smart-sklad.uz](https://smart-sklad.uz)', '[http://smart-sklad.uz](http://smart-sklad.uz)']
