@@ -22,3 +22,4 @@ uritemplate==4.2.0
 psycopg2-binary>=2.9.9
 google-genai
 python-dotenv
+gunicorn
