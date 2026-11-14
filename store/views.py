@@ -199,7 +199,7 @@ class LogoutView(APIView):
             status=status.HTTP_200_OK
         )
 
-        response.delete_cookie('access')
+        response.delete_cookie('access_token')
         response.delete_cookie('refresh')
 
         return response
