@@ -78,18 +78,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         print("destroy funksiyasi ishladi")
         instance=self.get_object()
-
-        with transaction.atomic():
-
-            for sale_item in instance.items.all():
-                mahsulot = sale_item.product
-                print(f"qaytayotgan tovar {mahsulot.name}, {sale_item}")
-
-                mahsulot.stock_quantity += sale_item.quantity
-                mahsulot.save()
-
-            instance.is_active=False
-            instance.save()
+        instance.is_active=False
+        instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
