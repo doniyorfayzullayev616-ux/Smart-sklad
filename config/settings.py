@@ -167,3 +167,5 @@ SESSION_COOKIE_SAMESITE = 'Strict'
 CSRF_COOKIE_SAMESITE = 'Strict'
 
 CSRF_TRUSTED_ORIGINS = ['[https://smart-sklad.uz](https://smart-sklad.uz)', '[http://smart-sklad.uz](http://smart-sklad.uz)']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
